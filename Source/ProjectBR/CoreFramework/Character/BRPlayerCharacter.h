@@ -6,7 +6,9 @@
 #include "GameFramework/Character.h"
 #include "BRPlayerCharacter.generated.h"
 
+class UCameraComponent;
 class UInputMappingContext;
+class USpringArmComponent;
 
 UCLASS()
 class PROJECTBR_API ABRPlayerCharacter : public ACharacter
@@ -22,7 +24,19 @@ protected:
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
+	
+#pragma region Default
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<USpringArmComponent> SpringArm;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UCameraComponent> Camera;
+#pragma endregion
+	
+#pragma region Input
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
+#pragma endregion
 };
