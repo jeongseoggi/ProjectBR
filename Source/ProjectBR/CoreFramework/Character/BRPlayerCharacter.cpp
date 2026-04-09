@@ -25,7 +25,6 @@ void ABRPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 }
 
-
 void ABRPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -42,7 +41,27 @@ void ABRPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABRPlayerCharacter::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABRPlayerCharacter::Look);
 	}
 }
 
+
+void ABRPlayerCharacter::Move(const FInputActionValue& Value)
+{
+	FVector2D MoveVec = Value.Get<FVector2D>();
+	
+	AddMovementInput(GetActorForwardVector(), MoveVec.X);
+	AddMovementInput(GetActorRightVector(), MoveVec.Y);
+}
+
+void ABRPlayerCharacter::Look(const FInputActionValue& Value)
+{
+	FVector2D LookVec = Value.Get<FVector2D>();
+	
+	if (Controller)
+	{
+		AddControllerYawInput(LookVec.X);
+		AddControllerPitchInput(-LookVec.Y);
+	}
+}

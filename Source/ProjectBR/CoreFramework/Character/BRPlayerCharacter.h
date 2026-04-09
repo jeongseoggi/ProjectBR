@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "BRPlayerCharacter.generated.h"
 
+struct FInputActionValue;
+class UInputAction;
 class UCameraComponent;
 class UInputMappingContext;
 class USpringArmComponent;
@@ -17,12 +19,18 @@ class PROJECTBR_API ABRPlayerCharacter : public ACharacter
 
 public:
 	ABRPlayerCharacter();
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
 	virtual void BeginPlay() override;
-
-public:
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	UFUNCTION()
+	void Move(const FInputActionValue& Value);
+	
+	UFUNCTION()
+	void Look(const FInputActionValue& Value);
+private:
+	
 	
 	
 #pragma region Default
@@ -38,5 +46,11 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UInputAction> MoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UInputAction> LookAction;
 #pragma endregion
 };
