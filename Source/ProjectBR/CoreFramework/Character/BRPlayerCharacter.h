@@ -3,9 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
 #include "GameFramework/Character.h"
 #include "BRPlayerCharacter.generated.h"
 
+class UGameplayAbility;
+class UBRInputData;
 struct FInputActionValue;
 class UInputAction;
 class UCameraComponent;
@@ -13,26 +16,31 @@ class UInputMappingContext;
 class USpringArmComponent;
 
 UCLASS()
-class PROJECTBR_API ABRPlayerCharacter : public ACharacter
+class PROJECTBR_API ABRPlayerCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 public:
 	ABRPlayerCharacter();
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	UAbilitySystemComponent* GetAbilitySystemComponent();
+	
 protected:
 	virtual void BeginPlay() override;
+	
+	void GiveDefaultAbilites();
 	
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
 	
 	UFUNCTION()
 	void Look(const FInputActionValue& Value);
+	
+	void Input_AbilityInputTagPressed(FGameplayTag InputTag);
+	void Input_AbilityInputTagReleased(FGameplayTag InputTag);
+	
 private:
-	
-	
-	
+
 #pragma region Default
 protected:
 	UPROPERTY(EditDefaultsOnly)
@@ -40,6 +48,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UCameraComponent> Camera;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UAbilitySystemComponent> ASC;
 #pragma endregion
 	
 #pragma region Input
@@ -52,5 +63,14 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UInputAction> LookAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UBRInputData> InputData;
+#pragma endregion
+	
+#pragma region Abilities
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
 #pragma endregion
 };
