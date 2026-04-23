@@ -7,6 +7,8 @@
 #include "Engine/DataAsset.h"
 #include "BRInputData.generated.h"
 
+class UInputAction;
+
 USTRUCT(BlueprintType)
 struct FBRInputAction
 {

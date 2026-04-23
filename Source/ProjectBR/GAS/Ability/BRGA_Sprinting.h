@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BRGameplayAbility.h"
 #include "Abilities/GameplayAbility.h"
 #include "BRGA_Sprinting.generated.h"
 
@@ -10,7 +11,7 @@
  * 
  */
 UCLASS()
-class PROJECTBR_API UBRGA_Sprinting : public UGameplayAbility
+class PROJECTBR_API UBRGA_Sprinting : public UBRGameplayAbility
 {
 	GENERATED_BODY()
 	

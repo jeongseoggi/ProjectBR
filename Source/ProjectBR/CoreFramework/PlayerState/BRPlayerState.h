@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerState.h"
 #include "BRPlayerState.generated.h"
 
+class UAttributeSet;
 /**
  * 
  */

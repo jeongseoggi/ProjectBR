@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "ProjectBR/CoreFramework/Input/BRInputComponent.h"
 #include "ProjectBR/CoreFramework/PlayerState/BRPlayerState.h"
+#include "ProjectBR/GAS/Ability/BRGameplayAbility.h"
 #include "ProjectBR/GAS/Component/BRAbilitySystemComponent.h"
 
 
@@ -28,19 +29,37 @@ void ABRPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	ASC = GetAbilitySystemComponent();
-	if (ASC)
+	AbilitySystemComponent = GetAbilitySystemComponent();
+	if (AbilitySystemComponent)
 	{
-		ASC->InitAbilityActorInfo(this, this);
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
 		GiveDefaultAbilites();
 	}
 }
 
 void ABRPlayerCharacter::GiveDefaultAbilites()
 {
-	check(ASC);
+	check(AbilitySystemComponent);
 	
-	
+	for (TSubclassOf<UGameplayAbility> AbilityClass : DefaultAbilities)
+	{
+		if (AbilitySystemComponent->FindAbilitySpecFromClass(AbilityClass))
+		{
+			continue;
+		}
+		
+		FGameplayAbilitySpec Spec(AbilityClass, 1, INDEX_NONE, this);
+		
+		if (const UBRGameplayAbility* BRAbility = Cast<UBRGameplayAbility>(AbilityClass->GetDefaultObject()))
+		{
+			if (BRAbility->StartupInputTag.IsValid())
+			{
+				Spec.DynamicAbilityTags.AddTag(BRAbility->StartupInputTag);
+			}
+		}
+		
+		AbilitySystemComponent->GiveAbility(Spec);
+	}
 	
 }
 
@@ -62,12 +81,13 @@ void ABRPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABRPlayerCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABRPlayerCharacter::Look);
+		//EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABRPlayerCharacter::Look);
 	}
 	
-	UBRInputComponent* PTWInputComp = CastChecked<UBRInputComponent>(PlayerInputComponent);
+	UBRInputComponent* BRInputComp = CastChecked<UBRInputComponent>(PlayerInputComponent);
 
 	TArray<uint32> BindHandles;
-	PTWInputComp->BindAbilityActions(
+	BRInputComp->BindAbilityActions(
 		InputData,
 		this,
 		&ThisClass::Input_AbilityInputTagPressed,
@@ -76,7 +96,7 @@ void ABRPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	);
 }
 
-UAbilitySystemComponent* ABRPlayerCharacter::GetAbilitySystemComponent()
+UAbilitySystemComponent* ABRPlayerCharacter::GetAbilitySystemComponent() const
 {
 	if (ABRPlayerState* PS = Cast<ABRPlayerState>(GetPlayerState()))
 	{
@@ -85,7 +105,6 @@ UAbilitySystemComponent* ABRPlayerCharacter::GetAbilitySystemComponent()
 	
 	return nullptr;
 }
-
 
 void ABRPlayerCharacter::Move(const FInputActionValue& Value)
 {

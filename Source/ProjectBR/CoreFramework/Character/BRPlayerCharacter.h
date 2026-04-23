@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "BRPlayerCharacter.generated.h"
 
+struct FGameplayTag;
 class UGameplayAbility;
 class UBRInputData;
 struct FInputActionValue;
@@ -23,7 +24,7 @@ class PROJECTBR_API ABRPlayerCharacter : public ACharacter, public IAbilitySyste
 public:
 	ABRPlayerCharacter();
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	UAbilitySystemComponent* GetAbilitySystemComponent();
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -50,7 +51,7 @@ protected:
 	TObjectPtr<UCameraComponent> Camera;
 	
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UAbilitySystemComponent> ASC;
+	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 #pragma endregion
 	
 #pragma region Input
@@ -63,6 +64,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UInputAction> LookAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UInputAction> SprintAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UBRInputData> InputData;

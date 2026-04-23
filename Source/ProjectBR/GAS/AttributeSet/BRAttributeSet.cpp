@@ -9,7 +9,8 @@
 
 UBRAttributeSet::UBRAttributeSet()
 {
-	
+	InitMoveSpeed(300.0f);
+	InitMaxMoveSpeed(1000.0f);
 }
 
 void UBRAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
@@ -55,6 +56,26 @@ void UBRAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModC
 		if (Data.EvaluatedData.Attribute == GetMoveSpeedAttribute())
 		{
 			TargetCharacter->GetCharacterMovement()->MaxWalkSpeed = GetMoveSpeed();
+			
+			UE_LOG(LogTemp, Warning, TEXT("%f"), TargetCharacter->GetCharacterMovement()->MaxWalkSpeed);
+		}
+	}
+}
+
+void UBRAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
+{
+	Super::PostAttributeChange(Attribute, OldValue, NewValue);
+	
+	if (Attribute == GetMoveSpeedAttribute())
+	{
+		UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent();
+		if (ASC && ASC->GetAvatarActor())
+		{
+			ACharacter* Character = Cast<ACharacter>(ASC->GetAvatarActor());
+			if (Character && Character->GetCharacterMovement())
+			{
+				Character->GetCharacterMovement()->MaxWalkSpeed = NewValue;
+			}
 		}
 	}
 }
