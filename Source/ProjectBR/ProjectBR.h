@@ -3,4 +3,5 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#define LOCK_ON ECC_GameTraceChannel1
 

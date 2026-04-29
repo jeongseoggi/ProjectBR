@@ -7,8 +7,11 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "ProjectBR/CoreFramework/Component/WeaponComponent.h"
 #include "ProjectBR/CoreFramework/Input/BRInputComponent.h"
+#include "ProjectBR/CoreFramework/PlayerController/BRPlayerController.h"
 #include "ProjectBR/CoreFramework/PlayerState/BRPlayerState.h"
 #include "ProjectBR/GAS/Ability/BRGameplayAbility.h"
 #include "ProjectBR/GAS/Component/BRAbilitySystemComponent.h"
@@ -23,6 +26,21 @@ ABRPlayerCharacter::ABRPlayerCharacter()
 	
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
+	
+	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
+}
+
+void ABRPlayerCharacter::SetLockOnState(bool bNewState)
+{
+	bIsStrafing = bNewState;
+	
+	bUseControllerRotationYaw = bNewState;
+	GetCharacterMovement()->bOrientRotationToMovement = !bNewState;
+	
+	if (SpringArm)
+	{
+		SpringArm->TargetArmLength = bNewState ? 450.f : 300.f;
+	}
 }
 
 void ABRPlayerCharacter::BeginPlay()
@@ -81,7 +99,7 @@ void ABRPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABRPlayerCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABRPlayerCharacter::Look);
-		//EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABRPlayerCharacter::Look);
+		EnhancedInputComponent->BindAction(LockOnAction, ETriggerEvent::Started, this, &ABRPlayerCharacter::LockOn);
 	}
 	
 	UBRInputComponent* BRInputComp = CastChecked<UBRInputComponent>(PlayerInputComponent);
@@ -108,10 +126,19 @@ UAbilitySystemComponent* ABRPlayerCharacter::GetAbilitySystemComponent() const
 
 void ABRPlayerCharacter::Move(const FInputActionValue& Value)
 {
-	FVector2D MoveVec = Value.Get<FVector2D>();
-	
-	AddMovementInput(GetActorForwardVector(), MoveVec.X);
-	AddMovementInput(GetActorRightVector(), MoveVec.Y);
+	FVector2D MovementVector = Value.Get<FVector2D>();
+
+	if (Controller != nullptr)
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		AddMovementInput(ForwardDirection, MovementVector.Y);
+		
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		AddMovementInput(RightDirection, MovementVector.X);
+	}
 }
 
 void ABRPlayerCharacter::Look(const FInputActionValue& Value)
@@ -122,6 +149,31 @@ void ABRPlayerCharacter::Look(const FInputActionValue& Value)
 	{
 		AddControllerYawInput(LookVec.X);
 		AddControllerPitchInput(-LookVec.Y);
+	}
+}
+
+void ABRPlayerCharacter::LockOn(const FInputActionValue& Value)
+{
+	// ABRPlayerController* PC = Cast<ABRPlayerController>(GetController());
+	// if (!PC) return;
+	//
+	// PC->ToggleLockOn(); 
+	//
+	// if (PC->IsLockOn())
+	// {
+	// 	GetCharacterMovement()->bOrientRotationToMovement = false;
+	// 	bUseControllerRotationYaw = true;
+	// }
+	// else
+	// {
+	// 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	// 	bUseControllerRotationYaw = false;
+	// }
+	
+	ABRPlayerController* PC = Cast<ABRPlayerController>(GetController());
+	if (PC)
+	{
+		PC->ToggleLockOn();
 	}
 }
 
