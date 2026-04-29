@@ -3,6 +3,7 @@
 
 #include "BRPlayerCharacter.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -100,6 +101,7 @@ void ABRPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABRPlayerCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABRPlayerCharacter::Look);
 		EnhancedInputComponent->BindAction(LockOnAction, ETriggerEvent::Started, this, &ABRPlayerCharacter::LockOn);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ABRPlayerCharacter::Attack);
 	}
 	
 	UBRInputComponent* BRInputComp = CastChecked<UBRInputComponent>(PlayerInputComponent);
@@ -154,27 +156,18 @@ void ABRPlayerCharacter::Look(const FInputActionValue& Value)
 
 void ABRPlayerCharacter::LockOn(const FInputActionValue& Value)
 {
-	// ABRPlayerController* PC = Cast<ABRPlayerController>(GetController());
-	// if (!PC) return;
-	//
-	// PC->ToggleLockOn(); 
-	//
-	// if (PC->IsLockOn())
-	// {
-	// 	GetCharacterMovement()->bOrientRotationToMovement = false;
-	// 	bUseControllerRotationYaw = true;
-	// }
-	// else
-	// {
-	// 	GetCharacterMovement()->bOrientRotationToMovement = true;
-	// 	bUseControllerRotationYaw = false;
-	// }
-	
 	ABRPlayerController* PC = Cast<ABRPlayerController>(GetController());
 	if (PC)
 	{
 		PC->ToggleLockOn();
 	}
+}
+
+void ABRPlayerCharacter::Attack(const FInputActionValue& Value)
+{
+	FGameplayEventData Payload;
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, 
+		FGameplayTag::RequestGameplayTag("Event.Combo.InputPressed"), Payload);
 }
 
 void ABRPlayerCharacter::Input_AbilityInputTagPressed(FGameplayTag InputTag)

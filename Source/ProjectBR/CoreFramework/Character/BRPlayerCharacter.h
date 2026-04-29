@@ -43,6 +43,9 @@ protected:
 	UFUNCTION()
 	void LockOn(const FInputActionValue& Value);
 	
+	UFUNCTION()
+	void Attack(const FInputActionValue& Value);
+	
 	void Input_AbilityInputTagPressed(FGameplayTag InputTag);
 	void Input_AbilityInputTagReleased(FGameplayTag InputTag);
 	
@@ -79,6 +82,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UInputAction> LockOnAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UInputAction> AttackAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UBRInputData> InputData;
